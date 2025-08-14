@@ -2,81 +2,46 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <stdexcept>
+
+using namespace std;
 
 int main() {
     try {
-        // Welcome header
-        std::cout << "========================================\n";
-        std::cout << "    AUTONOMOUS PARKING ASSISTANT\n";
-        std::cout << "========================================\n\n";
-        
-        // Get car dimensions
-        double carLength = getDoubleInput("Enter car length (meters): ");
-        double carWidth = getDoubleInput("Enter car width (meters): ");
-        
-        // Get parking type
-        char parkingType;
-        bool parallel;
+        cout << "=== Autonomous Parking Assistant ===\n";
+
+        // Car dimensions must be > 0
+        double carLength = getDoubleInput("Enter your car length (m): ", false);
+        double carWidth  = getDoubleInput("Enter your car width (m): ", false);
+
+        char typeChoice;
         while (true) {
-            std::cout << "Select parking type:\n";
-            std::cout << "P - Parallel parking\n";
-            std::cout << "T - Perpendicular parking\n";
-            std::cout << "Enter choice (P/T): ";
-            std::cin >> parkingType;
-            
-            if (parkingType == 'P' || parkingType == 'p') {
-                parallel = true;
-                break;
-            } else if (parkingType == 'T' || parkingType == 't') {
-                parallel = false;
-                break;
-            } else {
-                std::cout << "Invalid choice. Please enter P or T.\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
+            cout << "Choose parking type: (P)arallel or (T)Perpendicular: ";
+            cin >> typeChoice;
+            if (typeChoice == 'P' || typeChoice == 'p' || typeChoice == 'T' || typeChoice == 't') break;
+            cout << "❌ Invalid input! Enter P or T.\n";
         }
-        
-        // Get driving mode
-        char drivingMode;
-        bool reverseMode;
+        bool parallel = (typeChoice == 'P' || typeChoice == 'p');
+
+        char modeChoice;
         while (true) {
-            std::cout << "\nSelect driving mode:\n";
-            std::cout << "F - Forward\n";
-            std::cout << "R - Reverse\n";
-            std::cout << "Enter choice (F/R): ";
-            std::cin >> drivingMode;
-            
-            if (drivingMode == 'F' || drivingMode == 'f') {
-                reverseMode = false;
-                break;
-            } else if (drivingMode == 'R' || drivingMode == 'r') {
-                reverseMode = true;
-                break;
-            } else {
-                std::cout << "Invalid choice. Please enter F or R.\n";
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            }
+            cout << "Choose parking mode: (F)orward or (R)everse: ";
+            cin >> modeChoice;
+            if (modeChoice == 'F' || modeChoice == 'f' || modeChoice == 'R' || modeChoice == 'r') break;
+            cout << "❌ Invalid input! Enter F or R.\n";
         }
-        
-        // Find parking space
-        if (findParkingSpace(parallel, carLength, carWidth)) {
-            // Start parking assistant loop
-            parkingAssistantLoop(reverseMode, parallel);
-        } else {
-            std::cout << "\nNo suitable parking space available. Exiting...\n";
+        bool reverseMode = (modeChoice == 'R' || modeChoice == 'r');
+
+        if (!findParkingSpace(parallel, carLength, carWidth)) {
+            // No space or user entered 0
+            return 0;
         }
-        
-        std::cout << "\nThank you for using Autonomous Parking Assistant!\n";
-        
+
+        parkingAssistantLoop(reverseMode, parallel);
+
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    } catch (...) {
-        std::cerr << "Unknown error occurred." << std::endl;
-        return 1;
+        cerr << "❌ Error: " << e.what() << "\n";
     }
-    
+
     return 0;
 }

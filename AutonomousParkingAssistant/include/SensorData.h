@@ -1,11 +1,20 @@
 #ifndef SENSOR_DATA_H
 #define SENSOR_DATA_H
 
-// SensorData struct to hold distance measurements from three sensors
+#include <string>
+#include <stdexcept>
+
+// Struct to store distances
 struct SensorData {
-    double left;    // Distance from left sensor (in meters)
-    double center;  // Distance from center sensor (in meters)
-    double right;   // Distance from right sensor (in meters)
+    double left;
+    double center;
+    double right;
+};
+
+// Custom exception for collision
+class UnsafeParkingException : public std::runtime_error {
+public:
+    UnsafeParkingException(const std::string& msg) : std::runtime_error(msg) {}
 };
 
 #endif // SENSOR_DATA_H

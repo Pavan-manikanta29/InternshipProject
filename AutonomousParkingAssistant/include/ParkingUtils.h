@@ -2,13 +2,17 @@
 #define PARKING_UTILS_H
 
 #include <string>
+#include <vector>
 #include "SensorData.h"
 
 // Input validation function
-double getDoubleInput(const std::string& prompt);
+double getDoubleInput(const std::string& prompt, bool allowZero = true);
 
 // Safety check function
 std::string checkSafety(const SensorData& s);
+
+// Beep for proximity
+void beepAlert(const SensorData& s);
 
 // Calculate required parking space
 double requiredSpace(bool parallel, double carLength, double carWidth);

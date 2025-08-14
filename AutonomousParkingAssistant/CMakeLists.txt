@@ -1,20 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 project(AutonomousParkingAssistant)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 11)
+# Set C++ standard to C++14 for better compatibility
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include directories
 include_directories(include)
 
-# Find all source files in src directory
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+# Create main executable (compile all source files together)
+add_executable(AutonomousParkingAssistant src/ParkingUtils.cpp src/main.cpp)
 
-# Create main executable
-add_executable(AutonomousParkingAssistant ${SOURCES})
-
-# Create test executable
+# Create test executable (include ParkingUtils.cpp for function implementations)
 add_executable(testParkingUtils tests/testParkingUtils.cpp src/ParkingUtils.cpp)
 
 # Set output directories
@@ -28,5 +25,6 @@ set_target_properties(testParkingUtils PROPERTIES
 
 # Print configuration info
 message(STATUS "Building Autonomous Parking Assistant")
-message(STATUS "Source files: ${SOURCES}")
+message(STATUS "Source files: src/ParkingUtils.cpp src/main.cpp")
 message(STATUS "Include directories: ${CMAKE_CURRENT_SOURCE_DIR}/include")
+message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
