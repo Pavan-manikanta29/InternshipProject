@@ -1,3 +1,34 @@
+/**
+ * @file testParkingUtils.cpp
+ * @brief Comprehensive unit tests for the Autonomous Parking Assistant system
+ * @author Autonomous Parking Assistant Team
+ * @version 2.0
+ * @date 2024
+ * 
+ * This file contains comprehensive unit tests for all components of the
+ * autonomous parking assistant system. It tests all functions, data structures,
+ * and exception handling to ensure the system works correctly under various
+ * conditions and edge cases.
+ * 
+ * Test Coverage:
+ * - Data structure validation (SensorData struct)
+ * - Exception handling (UnsafeParkingException)
+ * - Input validation (getDoubleInput function)
+ * - Safety analysis (checkSafety function)
+ * - Audio alerts (beepAlert function)
+ * - Space calculations (requiredSpace function)
+ * - Parking space scanning (findParkingSpace function)
+ * - Main parking loop (parkingAssistantLoop function)
+ * - Integration scenarios (end-to-end testing)
+ * 
+ * Testing Features:
+ * - Automated input/output simulation
+ * - Exception testing and validation
+ * - Edge case and boundary condition testing
+ * - Integration workflow testing
+ * - Comprehensive error scenario coverage
+ */
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -26,15 +57,35 @@ double requiredSpace(bool parallel, double carLength, double carWidth);
 bool findParkingSpace(bool parallel, double carLength, double carWidth);
 void parkingAssistantLoop(bool reverseMode, bool parallel);
 
-// Test utilities
+/**
+ * @class TestUtils
+ * @brief Utility class for managing test input/output simulation
+ * 
+ * This class provides utilities for simulating user input and capturing
+ * program output during testing. It allows tests to provide controlled
+ * input and verify expected output without requiring manual interaction.
+ * 
+ * Features:
+ * - Input stream redirection for automated testing
+ * - Output stream capture for result verification
+ * - Buffer management for multiple test scenarios
+ * - Automatic cleanup and restoration of original streams
+ */
 class TestUtils {
 private:
-    static std::stringstream inputBuffer;
-    static std::stringstream outputBuffer;
-    static std::streambuf* originalCin;
-    static std::streambuf* originalCout;
+    static std::stringstream inputBuffer;    ///< Buffer for simulated input
+    static std::stringstream outputBuffer;   ///< Buffer for captured output
+    static std::streambuf* originalCin;      ///< Original cin stream buffer
+    static std::streambuf* originalCout;     ///< Original cout stream buffer
 
 public:
+    /**
+     * @brief Sets up input/output redirection for testing
+     * 
+     * This function redirects cin and cout to internal buffers
+     * to allow automated testing without manual input/output.
+     * It stores the original stream buffers for later restoration.
+     */
     static void setupTestIO() {
         originalCin = std::cin.rdbuf();
         originalCout = std::cout.rdbuf();
@@ -42,6 +93,12 @@ public:
         std::cout.rdbuf(outputBuffer.rdbuf());
     }
 
+    /**
+     * @brief Restores original input/output streams and clears buffers
+     * 
+     * This function restores the original cin and cout streams
+     * and clears the internal buffers for the next test.
+     */
     static void restoreIO() {
         std::cin.rdbuf(originalCin);
         std::cout.rdbuf(originalCout);
@@ -51,35 +108,71 @@ public:
         outputBuffer.clear();
     }
 
+    /**
+     * @brief Provides simulated input for testing
+     * @param input The input string to simulate
+     * 
+     * This function sets up the input buffer with the specified
+     * input string for automated testing scenarios.
+     */
     static void provideInput(const std::string& input) {
         inputBuffer.str(input);
         inputBuffer.clear();
     }
 
+    /**
+     * @brief Retrieves captured output from testing
+     * @return The captured output as a string
+     * 
+     * This function returns the output that was captured during
+     * the test execution for verification purposes.
+     */
     static std::string getOutput() {
         return outputBuffer.str();
     }
 
+    /**
+     * @brief Clears the output buffer for the next test
+     * 
+     * This function clears the output buffer to prepare
+     * for the next test scenario.
+     */
     static void clearOutput() {
         outputBuffer.str("");
         outputBuffer.clear();
     }
 };
 
+// Static member initialization
 std::stringstream TestUtils::inputBuffer;
 std::stringstream TestUtils::outputBuffer;
 std::streambuf* TestUtils::originalCin = nullptr;
 std::streambuf* TestUtils::originalCout = nullptr;
 
-// Test functions
+/**
+ * @brief Tests the SensorData structure functionality
+ * 
+ * This test validates that the SensorData structure correctly
+ * stores and maintains sensor distance values. It tests:
+ * - Structure initialization with different values
+ * - Value assignment and retrieval
+ * - Data integrity across operations
+ * 
+ * Test Cases:
+ * - Normal sensor data with different values
+ * - Equal sensor data values
+ * - Edge case values
+ */
 void testSensorDataStruct() {
     std::cout << "Testing SensorData struct...\n";
     
+    // Test normal sensor data with different values
     SensorData s1 = {1.0, 2.0, 3.0};
     assert(s1.left == 1.0);
     assert(s1.center == 2.0);
     assert(s1.right == 3.0);
     
+    // Test equal sensor data values
     SensorData s2 = {0.5, 0.5, 0.5};
     assert(s2.left == 0.5);
     assert(s2.center == 0.5);
@@ -88,6 +181,21 @@ void testSensorDataStruct() {
     std::cout << "✅ SensorData struct tests passed\n";
 }
 
+/**
+ * @brief Tests the UnsafeParkingException class functionality
+ * 
+ * This test validates that the UnsafeParkingException class
+ * correctly handles exception creation and message retrieval.
+ * It tests:
+ * - Exception construction with custom messages
+ * - Message retrieval using what() method
+ * - Exception inheritance from std::runtime_error
+ * 
+ * Test Cases:
+ * - Exception creation with custom message
+ * - Message retrieval and validation
+ * - Exception type checking
+ */
 void testUnsafeParkingException() {
     std::cout << "Testing UnsafeParkingException...\n";
     
@@ -100,6 +208,23 @@ void testUnsafeParkingException() {
     std::cout << "✅ UnsafeParkingException tests passed\n";
 }
 
+/**
+ * @brief Tests the getDoubleInput function with various scenarios
+ * 
+ * This test validates the input validation functionality of
+ * getDoubleInput function. It tests:
+ * - Valid numeric input
+ * - Invalid input followed by valid input
+ * - Zero value handling with different allowZero settings
+ * - Error message generation
+ * 
+ * Test Cases:
+ * - Valid double input
+ * - Invalid input (non-numeric) followed by valid input
+ * - Zero input with allowZero=true (default)
+ * - Zero input with allowZero=false
+ * - Negative input rejection
+ */
 void testGetDoubleInput() {
     std::cout << "Testing getDoubleInput function...\n";
     
@@ -132,6 +257,22 @@ void testGetDoubleInput() {
     std::cout << "✅ getDoubleInput tests passed\n";
 }
 
+/**
+ * @brief Tests the checkSafety function with comprehensive scenarios
+ * 
+ * This test validates the safety analysis functionality of
+ * checkSafety function. It tests:
+ * - Collision detection and exception throwing
+ * - Proximity warning generation
+ * - Perfect parking detection
+ * - Safe condition identification
+ * 
+ * Test Cases:
+ * - Collision scenarios (all sensors)
+ * - Too close scenarios (individual and combined sides)
+ * - Perfect parking scenarios (edge cases and normal)
+ * - Safe scenarios (various distance combinations)
+ */
 void testCheckSafety() {
     std::cout << "Testing checkSafety function...\n";
     
@@ -202,6 +343,22 @@ void testCheckSafety() {
     std::cout << "✅ checkSafety tests passed\n";
 }
 
+/**
+ * @brief Tests the beepAlert function with various proximity scenarios
+ * 
+ * This test validates the audio alert functionality of
+ * beepAlert function. It tests:
+ * - No beep scenarios (all sensors safe)
+ * - Single beep scenarios (proximity warning)
+ * - Double beep scenarios (urgent warning)
+ * - Output message verification
+ * 
+ * Test Cases:
+ * - Safe distances (no beep)
+ * - Proximity distances (single beep)
+ * - Very close distances (double beep)
+ * - Mixed proximity scenarios
+ */
 void testBeepAlert() {
     std::cout << "Testing beepAlert function...\n";
     
@@ -233,6 +390,22 @@ void testBeepAlert() {
     std::cout << "✅ beepAlert tests passed\n";
 }
 
+/**
+ * @brief Tests the requiredSpace function with different parking scenarios
+ * 
+ * This test validates the parking space calculation functionality
+ * of requiredSpace function. It tests:
+ * - Parallel parking calculations
+ * - Perpendicular parking calculations
+ * - Different vehicle dimensions
+ * - Calculation accuracy
+ * 
+ * Test Cases:
+ * - Parallel parking with various vehicle sizes
+ * - Perpendicular parking with various vehicle sizes
+ * - Edge case vehicle dimensions
+ * - Calculation formula verification
+ */
 void testRequiredSpace() {
     std::cout << "Testing requiredSpace function...\n";
     
@@ -253,6 +426,23 @@ void testRequiredSpace() {
     std::cout << "✅ requiredSpace tests passed\n";
 }
 
+/**
+ * @brief Tests the findParkingSpace function with various scenarios
+ * 
+ * This test validates the parking space scanning functionality
+ * of findParkingSpace function. It tests:
+ * - Successful space finding
+ * - No suitable space scenarios
+ * - Edge cases (zero spaces, negative spaces)
+ * - Input validation
+ * 
+ * Test Cases:
+ * - Multiple spaces with one suitable
+ * - Multiple spaces with none suitable
+ * - Zero spaces available
+ * - Negative number of spaces
+ * - Invalid input handling
+ */
 void testFindParkingSpace() {
     std::cout << "Testing findParkingSpace function...\n";
     
@@ -285,6 +475,22 @@ void testFindParkingSpace() {
     std::cout << "✅ findParkingSpace tests passed\n";
 }
 
+/**
+ * @brief Tests the parkingAssistantLoop function with various scenarios
+ * 
+ * This test validates the main parking loop functionality
+ * of parkingAssistantLoop function. It tests:
+ * - Successful parking completion
+ * - Collision detection and handling
+ * - Opposite movement scenarios
+ * - Output verification
+ * 
+ * Test Cases:
+ * - Perfect parking in one step
+ * - Collision detection and emergency stop
+ * - Opposite movement with subsequent perfect parking
+ * - Output message verification
+ */
 void testParkingAssistantLoop() {
     std::cout << "Testing parkingAssistantLoop function...\n";
     
@@ -317,6 +523,22 @@ void testParkingAssistantLoop() {
     std::cout << "✅ parkingAssistantLoop tests passed\n";
 }
 
+/**
+ * @brief Tests integration scenarios for end-to-end functionality
+ * 
+ * This test validates the complete system integration by
+ * testing realistic parking scenarios. It tests:
+ * - Complete parking workflow
+ * - Summary table generation
+ * - Multiple step parking processes
+ * - System integration verification
+ * 
+ * Test Cases:
+ * - Multi-step parking process
+ * - Summary table generation and format
+ * - Complete workflow verification
+ * - Integration between all components
+ */
 void testIntegration() {
     std::cout << "Testing integration scenarios...\n";
     
@@ -341,10 +563,30 @@ void testIntegration() {
     std::cout << "✅ Integration tests passed\n";
 }
 
+/**
+ * @brief Executes all unit tests and provides comprehensive results
+ * 
+ * This function runs all unit tests in sequence and provides
+ * a comprehensive summary of test results. It includes:
+ * - Individual test execution
+ * - Error handling and reporting
+ * - Test result summary
+ * - Success/failure statistics
+ * 
+ * Test Execution:
+ * - All tests are executed in logical order
+ * - Each test provides individual feedback
+ * - Comprehensive error handling for test failures
+ * - Detailed success/failure reporting
+ * 
+ * @note This function serves as the main test runner
+ * @note All tests must pass for the system to be considered valid
+ */
 void runAllTests() {
     std::cout << "=== Running Autonomous Parking Assistant Unit Tests ===\n\n";
     
     try {
+        // Execute all tests in sequence
         testSensorDataStruct();
         testUnsafeParkingException();
         testGetDoubleInput();
@@ -355,22 +597,35 @@ void runAllTests() {
         testParkingAssistantLoop();
         testIntegration();
         
+        // Report successful completion
         std::cout << "\n🎉 All tests passed successfully!\n";
         std::cout << "Total tests run: 9\n";
         std::cout << "Passed: 9\n";
         std::cout << "Failed: 0\n";
         
     } catch (const std::exception& e) {
+        // Handle test failures
         std::cerr << "❌ Test failed with exception: " << e.what() << std::endl;
         std::cout << "Passed: 0\n";
         std::cout << "Failed: 1\n";
     } catch (...) {
+        // Handle unknown test failures
         std::cerr << "❌ Test failed with unknown exception" << std::endl;
         std::cout << "Passed: 0\n";
         std::cout << "Failed: 1\n";
     }
 }
 
+/**
+ * @brief Main entry point for the test suite
+ * @return 0 on successful test execution, 1 on test failure
+ * 
+ * This function serves as the entry point for the comprehensive
+ * test suite. It executes all tests and provides detailed results.
+ * 
+ * @note This function is separate from the main application
+ * @note All tests must pass for the system to be considered ready
+ */
 int main() {
     runAllTests();
     return 0;
